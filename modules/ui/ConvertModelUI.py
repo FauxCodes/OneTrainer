@@ -60,6 +60,7 @@ class ConvertModelUI(ctk.CTkToplevel):
             ("Stable Diffusion 3.5", ModelType.STABLE_DIFFUSION_35),
             ("Stable Diffusion XL 1.0 Base", ModelType.STABLE_DIFFUSION_XL_10_BASE),
             ("Stable Diffusion XL 1.0 Base Inpainting", ModelType.STABLE_DIFFUSION_XL_10_BASE_INPAINTING),
+            ("Stable Diffusion XL 1.0 Base Flow Matching", ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW),
             ("Wuerstchen v2", ModelType.WUERSTCHEN_2),
             ("Stable Cascade", ModelType.STABLE_CASCADE_1),
             ("PixArt Alpha", ModelType.PIXART_ALPHA),

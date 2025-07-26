@@ -9,6 +9,7 @@ StableDiffusionXLLoRAModelLoader = make_lora_model_loader(
     model_spec_map={
         ModelType.STABLE_DIFFUSION_XL_10_BASE: "resources/sd_model_spec/sd_xl_base_1.0-lora.json",
         ModelType.STABLE_DIFFUSION_XL_10_BASE_INPAINTING: "resources/sd_model_spec/sd_xl_base_1.0_inpainting-lora.json",
+        ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW: "resources/sd_model_spec/sd_xl_base_flow-lora.json",
     },
     model_class=StableDiffusionXLModel,
     model_loader_class=StableDiffusionXLModelLoader,

@@ -16,6 +16,7 @@ class ModelType(Enum):
 
     STABLE_DIFFUSION_XL_10_BASE = 'STABLE_DIFFUSION_XL_10_BASE'
     STABLE_DIFFUSION_XL_10_BASE_INPAINTING = 'STABLE_DIFFUSION_XL_10_BASE_INPAINTING'
+    STABLE_DIFFUSION_XL_10_BASE_FLOW = 'STABLE_DIFFUSION_XL_10_BASE_FLOW'
 
     WUERSTCHEN_2 = 'WUERSTCHEN_2'
     STABLE_CASCADE_1 = 'STABLE_CASCADE_1'
@@ -54,7 +55,8 @@ class ModelType(Enum):
 
     def is_stable_diffusion_xl(self):
         return self == ModelType.STABLE_DIFFUSION_XL_10_BASE \
-            or self == ModelType.STABLE_DIFFUSION_XL_10_BASE_INPAINTING
+            or self == ModelType.STABLE_DIFFUSION_XL_10_BASE_INPAINTING \
+            or self == ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW
 
     def is_stable_diffusion_3(self):
         return self == ModelType.STABLE_DIFFUSION_3 \
@@ -155,7 +157,8 @@ class ModelType(Enum):
             or self.is_sana() \
             or self.is_hunyuan_video() \
             or self.is_hi_dream() \
-            or self.is_z_image()
+            or self.is_z_image() \
+            or self == ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW
 
     def is_video_model(self) -> bool:
         return self.is_hunyuan_video() #incase we add more video models in the future

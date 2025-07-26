@@ -14,6 +14,7 @@ from modules.util.ModelWeightDtypes import ModelWeightDtypes
 from diffusers import (
     AutoencoderKL,
     DDIMScheduler,
+    FlowMatchEulerDiscreteScheduler,
     StableDiffusionXLInpaintPipeline,
     StableDiffusionXLPipeline,
     UNet2DConditionModel,
@@ -37,8 +38,43 @@ class StableDiffusionXLModelLoader(
                 return "resources/model_config/stable_diffusion_xl/sd_xl_base.yaml"
             case ModelType.STABLE_DIFFUSION_XL_10_BASE_INPAINTING:
                 return "resources/model_config/stable_diffusion_xl/sd_xl_base-inpainting.yaml"
+            case ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW:
+                return "resources/model_config/stable_diffusion_xl/sd_xl_base.yaml"
             case _:
                 return None
+
+    def __create_noise_scheduler(
+            self,
+            model_type: ModelType,
+            base_model_name: str,
+    ):
+        if model_type.is_flow_matching():
+            return FlowMatchEulerDiscreteScheduler.from_pretrained(
+                base_model_name,
+                subfolder="scheduler",
+            )
+        else:
+            noise_scheduler = DDIMScheduler.from_pretrained(
+                base_model_name,
+                subfolder="scheduler",
+            )
+            return create.create_noise_scheduler(
+                noise_scheduler=NoiseScheduler.DDIM,
+                original_noise_scheduler=noise_scheduler,
+            )
+
+    def __create_noise_scheduler_from_pipeline(
+            self,
+            model_type: ModelType,
+            pipeline_scheduler,
+    ):
+        if model_type.is_flow_matching():
+            return FlowMatchEulerDiscreteScheduler.from_config(pipeline_scheduler.config)
+        else:
+            return create.create_noise_scheduler(
+                noise_scheduler=NoiseScheduler.DDIM,
+                original_noise_scheduler=pipeline_scheduler,
+            )
 
     def __load_internal(
             self,
@@ -73,14 +109,7 @@ class StableDiffusionXLModelLoader(
             subfolder="tokenizer_2",
         )
 
-        noise_scheduler = DDIMScheduler.from_pretrained(
-            base_model_name,
-            subfolder="scheduler",
-        )
-        noise_scheduler = create.create_noise_scheduler(
-            noise_scheduler=NoiseScheduler.DDIM,
-            original_noise_scheduler=noise_scheduler,
-        )
+        noise_scheduler = self.__create_noise_scheduler(model_type, base_model_name)
 
         text_encoder_1 = self._load_transformers_sub_module(
             CLIPTextModel,
@@ -147,10 +176,7 @@ class StableDiffusionXLModelLoader(
             safety_checker=None,
         )
 
-        noise_scheduler = create.create_noise_scheduler(
-            noise_scheduler=NoiseScheduler.DDIM,
-            original_noise_scheduler=pipeline.scheduler,
-        )
+        noise_scheduler = self.__create_noise_scheduler_from_pipeline(model_type, pipeline.scheduler)
 
         if vae_model_name:
             pipeline.vae = AutoencoderKL.from_pretrained(
@@ -198,10 +224,7 @@ class StableDiffusionXLModelLoader(
                 use_safetensors=True,
             )
 
-        noise_scheduler = create.create_noise_scheduler(
-            noise_scheduler=NoiseScheduler.DDIM,
-            original_noise_scheduler=pipeline.scheduler,
-        )
+        noise_scheduler = self.__create_noise_scheduler_from_pipeline(model_type, pipeline.scheduler)
 
         if vae_model_name:
             vae = self._load_diffusers_sub_module(

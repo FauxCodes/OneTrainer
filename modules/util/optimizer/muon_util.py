@@ -30,7 +30,7 @@ def build_muon_adam_key_fn(
     else:
         # Default list of "hidden" parts.
         match model.model_type:
-            case ModelType.STABLE_DIFFUSION_15 | ModelType.STABLE_DIFFUSION_15_INPAINTING | ModelType.STABLE_DIFFUSION_20_BASE | ModelType.STABLE_DIFFUSION_20_INPAINTING | ModelType.STABLE_DIFFUSION_20 | ModelType.STABLE_DIFFUSION_21 | ModelType.STABLE_DIFFUSION_21_BASE | ModelType.STABLE_DIFFUSION_XL_10_BASE | ModelType.STABLE_DIFFUSION_XL_10_BASE_INPAINTING | ModelType.STABLE_CASCADE_1 | ModelType.WUERSTCHEN_2:
+            case ModelType.STABLE_DIFFUSION_15 | ModelType.STABLE_DIFFUSION_15_INPAINTING | ModelType.STABLE_DIFFUSION_20_BASE | ModelType.STABLE_DIFFUSION_20_INPAINTING | ModelType.STABLE_DIFFUSION_20 | ModelType.STABLE_DIFFUSION_21 | ModelType.STABLE_DIFFUSION_21_BASE | ModelType.STABLE_DIFFUSION_XL_10_BASE | ModelType.STABLE_DIFFUSION_XL_10_BASE_INPAINTING | ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW | ModelType.STABLE_CASCADE_1 | ModelType.WUERSTCHEN_2:
                 default_patterns = [
                     'block', # UNet
                     'text_model.encoder.layers', # TEs (CLIPs)

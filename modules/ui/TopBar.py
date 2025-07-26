@@ -88,6 +88,7 @@ class TopBar:
                 ("SD3.5", ModelType.STABLE_DIFFUSION_35),
                 ("SDXL", ModelType.STABLE_DIFFUSION_XL_10_BASE),
                 ("SDXL Inpainting", ModelType.STABLE_DIFFUSION_XL_10_BASE_INPAINTING),
+                ("SDXL Flow Matching", ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW),
                 ("Wuerstchen v2", ModelType.WUERSTCHEN_2),
                 ("Stable Cascade", ModelType.STABLE_CASCADE_1),
                 ("PixArt Alpha", ModelType.PIXART_ALPHA),

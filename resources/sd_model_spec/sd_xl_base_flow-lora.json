@@ -1,0 +1,15 @@
+{
+    "modelspec.sai_model_spec": "1.0.0",
+    "modelspec.architecture": "stable-diffusion-xl-v1-base/flow/lora",
+    "modelspec.implementation": "https://github.com/huggingface/diffusers",
+    "modelspec.title": "Stable Diffusion XL 1.0 Base Flow Matching LoRA",
+    "modelspec.description": "",
+    "modelspec.author": "StabilityAI",
+    "modelspec.date": "",
+    "modelspec.hash_sha256": "",
+    "modelspec.license": "CreativeML Open RAIL++-M License",
+    "modelspec.thumbnail": "",
+    "modelspec.resolution": "1024x1024",
+    "modelspec.prediction_type": "flow",
+    "modelspec.usage_hint": ""
+}
