@@ -2,7 +2,7 @@ from contextlib import nullcontext
 from random import Random
 
 from modules.model.BaseModel import BaseModel, BaseModelEmbedding
-from modules.model.util.clip_util import encode_clip
+from modules.model.util.clip_util import encode_clip, encode_clip_long, tokenize_chunked
 from modules.module.AdditionalEmbeddingWrapper import AdditionalEmbeddingWrapper
 from modules.module.LoRAModule import LoRAModuleWrapper
 from modules.util.convert.rescale_noise_scheduler_to_zero_terminal_snr import (
@@ -211,49 +211,82 @@ class StableDiffusionXLModel(BaseModel):
             text_encoder_1_dropout_probability: float | None = None,
             text_encoder_2_dropout_probability: float | None = None,
             pooled_text_encoder_2_output: Tensor = None,
+            extend_clip: bool = False,
     ) -> tuple[Tensor, Tensor, Tensor]:
-        if tokens_1 is None and text is not None:
-            tokenizer_output = self.tokenizer_1(
-                self.add_text_encoder_1_embeddings_to_prompt(text),
-                padding='max_length',
-                truncation=True,
-                max_length=77,
-                return_tensors="pt",
+        if extend_clip:
+            if tokens_1 is None and text is not None:
+                tokenizer_output = tokenize_chunked(self.add_text_encoder_1_embeddings_to_prompt(text), self.tokenizer_1)
+                tokens_1 = tokenizer_output['input_ids'].to(self.text_encoder_1.device)
+
+            if tokens_2 is None and text is not None:
+                tokenizer_output = tokenize_chunked(self.add_text_encoder_2_embeddings_to_prompt(text), self.tokenizer_2)
+                tokens_2 = tokenizer_output['input_ids'].to(self.text_encoder_2.device)
+
+            text_encoder_1_output, _ = encode_clip_long(
+                text_encoder=self.text_encoder_1,
+                tokens=tokens_1,
+                default_layer=-2,
+                layer_skip=text_encoder_1_layer_skip,
+                text_encoder_output=text_encoder_1_output,
+                add_pooled_output=False,
+                use_attention_mask=False,
+                add_layer_norm=False,
             )
-            tokens_1 = tokenizer_output.input_ids.to(self.text_encoder_1.device)
 
-        if tokens_2 is None and text is not None:
-            tokenizer_output = self.tokenizer_2(
-                self.add_text_encoder_2_embeddings_to_prompt(text),
-                padding='max_length',
-                truncation=True,
-                max_length=77,
-                return_tensors="pt",
+            text_encoder_2_output, pooled_text_encoder_2_output = encode_clip_long(
+                text_encoder=self.text_encoder_2,
+                tokens=tokens_2,
+                default_layer=-2,
+                layer_skip=text_encoder_2_layer_skip,
+                text_encoder_output=text_encoder_2_output,
+                add_pooled_output=True,
+                pooled_text_encoder_output=pooled_text_encoder_2_output,
+                use_attention_mask=False,
+                add_layer_norm=False,
             )
-            tokens_2 = tokenizer_output.input_ids.to(self.text_encoder_2.device)
+        else:
+            if tokens_1 is None and text is not None:
+                tokenizer_output = self.tokenizer_1(
+                    self.add_text_encoder_1_embeddings_to_prompt(text),
+                    padding='max_length',
+                    truncation=True,
+                    max_length=77,
+                    return_tensors="pt",
+                )
+                tokens_1 = tokenizer_output.input_ids.to(self.text_encoder_1.device)
 
-        text_encoder_1_output, _ = encode_clip(
-            text_encoder=self.text_encoder_1,
-            tokens=tokens_1,
-            default_layer=-2,
-            layer_skip=text_encoder_1_layer_skip,
-            text_encoder_output=text_encoder_1_output,
-            add_pooled_output=False,
-            use_attention_mask=False,
-            add_layer_norm=False,
-        )
+            if tokens_2 is None and text is not None:
+                tokenizer_output = self.tokenizer_2(
+                    self.add_text_encoder_2_embeddings_to_prompt(text),
+                    padding='max_length',
+                    truncation=True,
+                    max_length=77,
+                    return_tensors="pt",
+                )
+                tokens_2 = tokenizer_output.input_ids.to(self.text_encoder_2.device)
 
-        text_encoder_2_output, pooled_text_encoder_2_output = encode_clip(
-            text_encoder=self.text_encoder_2,
-            tokens=tokens_2,
-            default_layer=-2,
-            layer_skip=text_encoder_2_layer_skip,
-            text_encoder_output=text_encoder_2_output,
-            add_pooled_output=True,
-            pooled_text_encoder_output=pooled_text_encoder_2_output,
-            use_attention_mask=False,
-            add_layer_norm=False,
-        )
+            text_encoder_1_output, _ = encode_clip(
+                text_encoder=self.text_encoder_1,
+                tokens=tokens_1,
+                default_layer=-2,
+                layer_skip=text_encoder_1_layer_skip,
+                text_encoder_output=text_encoder_1_output,
+                add_pooled_output=False,
+                use_attention_mask=False,
+                add_layer_norm=False,
+            )
+
+            text_encoder_2_output, pooled_text_encoder_2_output = encode_clip(
+                text_encoder=self.text_encoder_2,
+                tokens=tokens_2,
+                default_layer=-2,
+                layer_skip=text_encoder_2_layer_skip,
+                text_encoder_output=text_encoder_2_output,
+                add_pooled_output=True,
+                pooled_text_encoder_output=pooled_text_encoder_2_output,
+                use_attention_mask=False,
+                add_layer_norm=False,
+            )
 
         text_encoder_1_output = self._apply_output_embeddings(
             self.all_text_encoder_1_embeddings(),

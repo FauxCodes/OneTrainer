@@ -41,8 +41,12 @@ class ModelSetupDebugMixin(metaclass=ABCMeta):
             f.write(text)
 
     def _decode_tokens(self, tokens: Tensor, tokenizer):
+        tokens = tokens.squeeze(0)
+        if tokens.ndim == 2:
+            tokens = tokens[:, 1:-1]
+            tokens = tokens.reshape(-1)
         return tokenizer.decode(
-            token_ids=tokens[0],
+            token_ids=tokens,
             skip_special_tokens=True,
             clean_up_tokenization_spaces=True,
         )

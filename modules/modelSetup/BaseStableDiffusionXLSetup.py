@@ -98,6 +98,7 @@ class BaseStableDiffusionXLSetup(
                     lambda text: model.encode_text(
                         text=text,
                         train_device=self.temp_device,
+                        extend_clip=True
                     )[0][0][1:],
                 )
 
@@ -109,6 +110,7 @@ class BaseStableDiffusionXLSetup(
                     lambda text: model.encode_text(
                         text=text,
                         train_device=self.temp_device,
+                        extend_clip=True
                     )[1][0][1:],
                 )
             else:
@@ -215,6 +217,7 @@ class BaseStableDiffusionXLSetup(
                     'text_encoder_2_pooled_state'] if not config.train_text_encoder_2_or_embedding() else None,
                 text_encoder_1_dropout_probability=config.text_encoder.dropout_probability,
                 text_encoder_2_dropout_probability=config.text_encoder_2.dropout_probability,
+                extend_clip=True
             ))
 
             latent_image = batch['latent_image']
