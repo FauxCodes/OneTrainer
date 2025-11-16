@@ -378,6 +378,11 @@ class TrainConfig(BaseConfig):
     learning_rate_scaler: LearningRateScaler
     clip_grad_norm: float
 
+    # clip expansion
+    expand_clip_token_limit: bool
+    clip_chunk_size: int
+    clip_max_chunks: int
+
     #layer filter
     layer_filter: str  # comma-separated
     layer_filter_preset: str
@@ -937,6 +942,11 @@ class TrainConfig(BaseConfig):
         data.append(("loss_scaler", LossScaler.NONE, LossScaler, False))
         data.append(("learning_rate_scaler", LearningRateScaler.NONE, LearningRateScaler, False))
         data.append(("clip_grad_norm", 1.0, float, True))
+
+        # clip expansion
+        data.append(("expand_clip_token_limit", True, bool, False)) # change to def False later
+        data.append(("clip_max_chunks", 3, int, False))
+        data.append(("clip_chunk_size", 75, int, False))
 
         # noise
         data.append(("offset_noise_weight", 0.0, float, False))
