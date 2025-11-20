@@ -82,7 +82,7 @@ def encode_clip_long(
             hidden_state[0, 0, :].unsqueeze(0),
             hidden_state_content.unsqueeze(0)[0, :, :],
             hidden_state[0, -1, :].unsqueeze(0)
-        ]).squeeze()
+        ])
 
         pooled_state = None
         if add_pooled_output:
@@ -98,11 +98,13 @@ def encode_clip_long(
             final_layer_norm = text_encoder.text_model.final_layer_norm
             hidden_state = final_layer_norm(hidden_state)
 
-        return hidden_state, pooled_state
+        return hidden_state.unsqueeze(0), pooled_state
     else:
         return text_encoder_output, pooled_text_encoder_output
 
 def _group_tokens(tokens: Tensor, clip_chunk_size: int = 75):
+    if tokens.dim() == 2:
+        tokens = tokens.squeeze(0)
     stripped_tokens = tokens[1:-1]  # slice off <EOS> and <BOS> tokens
     chunk_count = stripped_tokens.shape[0] // clip_chunk_size
     # reshape (1,N)->(C,expanded_chunk_size), where C is the number of chunks, N is a multiple of expanded_chunk_size
