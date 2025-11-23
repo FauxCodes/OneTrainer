@@ -89,22 +89,26 @@ class StableDiffusionXLBaseDataLoader(
                                          pooled_out_name=None,
                                          add_layer_norm=False,
                                          text_encoder=model.text_encoder_1,
+                                         tokenizer=model.tokenizer_1,
                                          hidden_state_output_index=-(2 + config.text_encoder_layer_skip),
                                          autocast_contexts=[model.autocast_context],
                                          dtype=model.train_dtype.torch_dtype(),
                                          expand_token_limit=config.expand_clip_token_limit,
-                                         expanded_chunk_size=config.clip_chunk_size)
+                                         expanded_chunk_size=config.clip_chunk_size,
+                                         expanded_max_chunks=config.clip_max_chunks)
         encode_prompt_2 = EncodeClipText(in_name='tokens_2',
                                          tokens_attention_mask_in_name=None,
                                          hidden_state_out_name='text_encoder_2_hidden_state',
                                          pooled_out_name='text_encoder_2_pooled_state',
                                          add_layer_norm=False,
                                          text_encoder=model.text_encoder_2,
+                                         tokenizer=model.tokenizer_2,
                                          hidden_state_output_index=-(2 + config.text_encoder_2_layer_skip),
                                          autocast_contexts=[model.autocast_context],
                                          dtype=model.train_dtype.torch_dtype(),
                                          expand_token_limit=config.expand_clip_token_limit,
-                                         expanded_chunk_size=config.clip_chunk_size)
+                                         expanded_chunk_size=config.clip_chunk_size,
+                                         expanded_max_chunks=config.clip_max_chunks)
 
         modules = [
             rescale_image, encode_image, image_sample,

@@ -237,6 +237,7 @@ class StableDiffusionXLModel(BaseModel):
         if self.train_config.expand_clip_token_limit:
             text_encoder_1_output, _ = encode_clip_long(
                 text_encoder=self.text_encoder_1,
+                tokenizer=self.tokenizer_1,
                 tokens=tokens_1,
                 default_layer=-2,
                 layer_skip=text_encoder_1_layer_skip,
@@ -261,6 +262,7 @@ class StableDiffusionXLModel(BaseModel):
         if self.train_config.expand_clip_token_limit:
             text_encoder_2_output, pooled_text_encoder_2_output = encode_clip_long(
                 text_encoder=self.text_encoder_2,
+                tokenizer=self.tokenizer_2,
                 tokens=tokens_2,
                 default_layer=-2,
                 layer_skip=text_encoder_2_layer_skip,

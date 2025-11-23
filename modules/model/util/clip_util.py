@@ -1,7 +1,9 @@
+from typing import List
+
 import torch
 from torch import Tensor
 
-from transformers import CLIPTextModel, CLIPTextModelWithProjection
+from transformers import CLIPTextModel, CLIPTextModelWithProjection, CLIPTokenizer
 
 
 def encode_clip(
@@ -45,6 +47,7 @@ def encode_clip(
 
 def encode_clip_long(
         text_encoder: CLIPTextModel | CLIPTextModelWithProjection,
+        tokenizer: CLIPTokenizer,
         tokens: Tensor | None = None,
         default_layer: int = -1,
         layer_skip: int = 0,
@@ -62,6 +65,7 @@ def encode_clip_long(
             and text_encoder is not None:
 
         if tokens is not None:
+            # token_groups = _group_tokens2(tokens, tokenizer, clip_chunk_size)
             token_groups = _group_tokens(tokens, clip_chunk_size)
         else:
             token_groups = None
@@ -119,3 +123,53 @@ def _group_tokens(tokens: Tensor, clip_chunk_size: int = 75):
         )
         token_groups.append(torch.cat(chunk))
     return torch.stack(token_groups)
+
+def _group_tokens2(tokens: Tensor, tokenizer: CLIPTokenizer, clip_chunk_size: int = 75):
+    if tokens.dim() == 2:
+        tokens = tokens.squeeze(0)
+    text = tokenizer.decode(tokens, skip_special_tokens=True)
+    chunks = _chunk_prompt(text, tokenizer)
+    return _tokenize_chunked(chunks, tokenizer, clip_chunk_size).to(tokens.device)
+
+def _chunk_prompt(text: str, tokenizer: CLIPTokenizer, chunk_size: int = 75) -> List[str]:
+    tokens = tokenizer.encode(text)
+    content_tokens = tokens[1:-1] if tokens[0] == tokenizer.bos_token_id else tokens
+
+    chunks = []
+    curr_chunk = []
+
+    for token in content_tokens:
+        if len(curr_chunk) < chunk_size:
+            curr_chunk.append(token)
+        else:
+            chunk_text = tokenizer.decode(curr_chunk)
+            if ', ' in chunk_text:
+                parts = chunk_text.rsplit(', ', 1)
+                if len(parts) == 2:
+                    first_part, remaining = parts
+                    if first_part:
+                        chunks.append(first_part + ',')
+                    curr_chunk = tokenizer.encode(remaining)[1:-1]
+                    curr_chunk.append(token)
+                    continue
+
+            chunks.append(chunk_text)
+            curr_chunk = [token]
+
+    if curr_chunk:
+        chunks.append(tokenizer.decode(curr_chunk))
+
+    return chunks
+
+def _tokenize_chunked(chunks: List[str], tokenizer: CLIPTokenizer, chunk_size: int = 75) -> Tensor:
+    tokenized_chunks = []
+    for chunk in chunks:
+        tokenized = tokenizer(
+            chunk,
+            max_length=chunk_size + 2,
+            padding="max_length",
+            truncation=True,
+            return_tensors="pt"
+        )
+        tokenized_chunks.append(tokenized)
+    return torch.cat([chunk['input_ids'] for chunk in tokenized_chunks], dim=0)
