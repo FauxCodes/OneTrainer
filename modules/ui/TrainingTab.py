@@ -118,7 +118,7 @@ class TrainingTab:
 
     def __setup_stable_diffusion_xl_ui(self, column_0, column_1, column_2):
         self.__create_base_frame(column_0, 0)
-        self.__create_text_encoder_n_frame(column_0, 1, i=1)
+        self.__create_text_encoder_n_frame(column_0, 1, i=1, supports_chunking=True)
         self.__create_text_encoder_n_frame(column_0, 2, i=2)
         self.__create_embedding_frame(column_0, 3)
 
@@ -419,7 +419,7 @@ class TrainingTab:
                          tooltip="Enables circular padding for all conv layers to better train seamless images")
         components.switch(frame, row, 1, self.ui_state, "force_circular_padding")
 
-    def __create_text_encoder_frame(self, master, row, supports_clip_skip=True, supports_training=True, supports_sequence_length=False):
+    def __create_text_encoder_frame(self, master, row, supports_clip_skip=True, supports_training=True, supports_sequence_length=False, supports_chunking=False):
         frame = ctk.CTkFrame(master=master, corner_radius=5)
         frame.grid(row=row, column=0, padx=5, pady=5, sticky="nsew")
         frame.grid_columnconfigure(0, weight=1)
@@ -459,6 +459,25 @@ class TrainingTab:
             components.entry(frame, row, 1, self.ui_state, "text_encoder_sequence_length")
             row += 1
 
+        if supports_chunking:
+            # use clip token chunks
+            components.label(frame, row, 0, "Use Clip Token Chunks",
+                             tooltip="Enables processing long prompts by splitting them into chunks. Currently only supported for SDXL.")
+            components.switch(frame, row, 1, self.ui_state, "use_clip_token_chunks")
+            row += 1
+
+            # clip chunk size
+            components.label(frame, row, 0, "Clip Chunk Size",
+                             tooltip="The size of each chunk (excluding BOS and EOS tokens).")
+            components.entry(frame, row, 1, self.ui_state, "clip_chunk_size")
+            row += 1
+
+            # clip max chunks
+            components.label(frame, row, 0, "Clip Max Chunks",
+                             tooltip="The maximum number of chunks to process.")
+            components.entry(frame, row, 1, self.ui_state, "clip_max_chunks")
+            row += 1
+
     def __create_text_encoder_n_frame(
             self,
             master,
@@ -467,6 +486,7 @@ class TrainingTab:
             supports_include: bool = False,
             supports_layer_skip: bool = True,
             supports_sequence_length: bool = False,
+            supports_chunking: bool = False,
     ):
         frame = ctk.CTkFrame(master=master, corner_radius=5)
         frame.grid(row=row, column=0, padx=5, pady=5, sticky="nsew")
@@ -525,6 +545,25 @@ class TrainingTab:
             components.label(frame, row, 0, f"Text Encoder {i} Sequence Length",
                              tooltip="Overrides the number of tokens used for captions. If empty, the model default is used, which is 512 on Flux. Comfy samples with 256 tokens though. 77 is the default only for backwards compatibility.")
             components.entry(frame, row, 1, self.ui_state, f"text_encoder{suffix}_sequence_length")
+            row += 1
+
+        if supports_chunking:
+            # use clip token chunks
+            components.label(frame, row, 0, "Use Clip Token Chunks",
+                             tooltip="Enables processing long prompts by splitting them into chunks. Currently only supported for SDXL.")
+            components.switch(frame, row, 1, self.ui_state, "use_clip_token_chunks")
+            row += 1
+
+            # clip chunk size
+            components.label(frame, row, 0, "Clip Chunk Size",
+                             tooltip="The size of each chunk (excluding BOS and EOS tokens).")
+            components.entry(frame, row, 1, self.ui_state, "clip_chunk_size")
+            row += 1
+
+            # clip max chunks
+            components.label(frame, row, 0, "Clip Max Chunks",
+                             tooltip="The maximum number of chunks to process.")
+            components.entry(frame, row, 1, self.ui_state, "clip_max_chunks")
             row += 1
 
     def __create_embedding_frame(self, master, row):
