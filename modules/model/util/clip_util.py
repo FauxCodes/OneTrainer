@@ -56,6 +56,7 @@ def encode_clip_chunked(
         use_attention_mask: bool = True,
         attention_mask: Tensor | None = None,
         add_layer_norm: bool = True,
+        min_chunks: int = 1,
 ) -> tuple[Tensor, Tensor]:
     if (add_output and text_encoder_output is None) \
             or (add_pooled_output and pooled_text_encoder_output is None) \
@@ -64,16 +65,19 @@ def encode_clip_chunked(
         max_length = text_encoder.config.max_position_embeddings
         chunk_size = max_length - 2
 
-        if tokens.shape[1] > max_length:
+        if tokens.shape[1] > max_length or min_chunks > 1:
             bos_token = tokens[:, 0:1]
             eos_token = tokens[:, -1:]
             content_tokens = tokens[:, 1:-1]
 
+            num_chunks = (content_tokens.shape[1] + chunk_size - 1) // chunk_size
+            num_chunks = max(num_chunks, min_chunks)
+
             outputs = []
             pooled_outputs = []
 
-            for i in range(0, content_tokens.shape[1], chunk_size):
-                chunk = content_tokens[:, i:i + chunk_size]
+            for i in range(num_chunks):
+                chunk = content_tokens[:, i * chunk_size:(i + 1) * chunk_size]
 
                 chunk_attention_mask = None
                 if use_attention_mask and attention_mask is not None:

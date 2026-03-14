@@ -69,11 +69,33 @@ class StableDiffusionXLSampler(BaseModelSampler):
             # prepare prompt
             self.model.text_encoder_to(self.train_device)
 
+            use_chunking = self.model.train_config.use_clip_token_chunks if self.model.train_config else False
+            min_chunks = 1
+
+            if use_chunking:
+                prompt_1_tokens = self.model.tokenizer_1(
+                    self.model.add_text_encoder_1_embeddings_to_prompt(prompt),
+                    add_special_tokens=True,
+                    return_tensors="pt",
+                ).input_ids
+                negative_prompt_1_tokens = self.model.tokenizer_1(
+                    self.model.add_text_encoder_1_embeddings_to_prompt(negative_prompt),
+                    add_special_tokens=True,
+                    return_tensors="pt",
+                ).input_ids
+
+                max_tokens = max(prompt_1_tokens.shape[1], negative_prompt_1_tokens.shape[1])
+                max_pos = self.model.text_encoder_1.config.max_position_embeddings
+                chunk_size = max_pos - 2
+                if max_tokens > max_pos:
+                    min_chunks = (max_tokens - 2 + chunk_size - 1) // chunk_size
+
             prompt_embedding, pooled_text_encoder_2_output = self.model.combine_text_encoder_output(*self.model.encode_text(
                 text=prompt,
                 train_device=self.train_device,
                 text_encoder_1_layer_skip=text_encoder_1_layer_skip,
                 text_encoder_2_layer_skip=text_encoder_2_layer_skip,
+                min_chunks=min_chunks,
             ))
 
             negative_prompt_embedding, negative_pooled_text_encoder_2_output = self.model.combine_text_encoder_output(*self.model.encode_text(
@@ -81,6 +103,7 @@ class StableDiffusionXLSampler(BaseModelSampler):
                 train_device=self.train_device,
                 text_encoder_1_layer_skip=text_encoder_1_layer_skip,
                 text_encoder_2_layer_skip=text_encoder_2_layer_skip,
+                min_chunks=min_chunks,
             ))
 
             combined_prompt_embedding = torch.cat([negative_prompt_embedding, prompt_embedding]) \

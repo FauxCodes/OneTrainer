@@ -211,12 +211,17 @@ class StableDiffusionXLModel(BaseModel):
             text_encoder_1_dropout_probability: float | None = None,
             text_encoder_2_dropout_probability: float | None = None,
             pooled_text_encoder_2_output: Tensor = None,
+            min_chunks: int = 1,
     ) -> tuple[Tensor, Tensor, Tensor]:
+        use_chunking = self.train_config.use_clip_token_chunks if self.train_config else False
+        encode_fn = encode_clip_chunked if use_chunking else encode_clip
+
         if tokens_1 is None and text is not None:
             tokenizer_output = self.tokenizer_1(
                 self.add_text_encoder_1_embeddings_to_prompt(text),
-                padding='do_not_pad',
-                truncation=False,
+                padding='max_length' if not use_chunking else 'do_not_pad',
+                truncation=not use_chunking,
+                max_length=self.tokenizer_1.model_max_length if not use_chunking else None,
                 return_tensors="pt",
             )
             tokens_1 = tokenizer_output.input_ids.to(self.text_encoder_1.device)
@@ -224,14 +229,18 @@ class StableDiffusionXLModel(BaseModel):
         if tokens_2 is None and text is not None:
             tokenizer_output = self.tokenizer_2(
                 self.add_text_encoder_2_embeddings_to_prompt(text),
-                padding='do_not_pad',
-                truncation=False,
+                padding='max_length' if not use_chunking else 'do_not_pad',
+                truncation=not use_chunking,
+                max_length=self.tokenizer_2.model_max_length if not use_chunking else None,
                 return_tensors="pt",
             )
             tokens_2 = tokenizer_output.input_ids.to(self.text_encoder_2.device)
 
-        use_chunking = self.train_config.use_clip_token_chunks if self.train_config else True
-        encode_fn = encode_clip_chunked if use_chunking else encode_clip
+        text_encoder_1_kwargs = {}
+        text_encoder_2_kwargs = {}
+        if use_chunking:
+            text_encoder_1_kwargs['min_chunks'] = min_chunks
+            text_encoder_2_kwargs['min_chunks'] = min_chunks
 
         text_encoder_1_output, _ = encode_fn(
             text_encoder=self.text_encoder_1,
@@ -242,6 +251,7 @@ class StableDiffusionXLModel(BaseModel):
             add_pooled_output=False,
             use_attention_mask=False,
             add_layer_norm=False,
+            **text_encoder_1_kwargs,
         )
 
         text_encoder_2_output, pooled_text_encoder_2_output = encode_fn(
@@ -254,6 +264,7 @@ class StableDiffusionXLModel(BaseModel):
             pooled_text_encoder_output=pooled_text_encoder_2_output,
             use_attention_mask=False,
             add_layer_norm=False,
+            **text_encoder_2_kwargs,
         )
 
         text_encoder_1_output = self._apply_output_embeddings(
