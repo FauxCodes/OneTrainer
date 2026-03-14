@@ -13,7 +13,7 @@ from modules.util.TrainProgress import TrainProgress
 
 from mgds.pipelineModules.DecodeTokens import DecodeTokens
 from mgds.pipelineModules.DecodeVAE import DecodeVAE
-from mgds.pipelineModules.EncodeClipText import EncodeClipText
+from modules.dataLoader.mgds_patch.EncodeClipText import EncodeClipText
 from mgds.pipelineModules.EncodeVAE import EncodeVAE
 from mgds.pipelineModules.MapData import MapData
 from mgds.pipelineModules.RescaleImageChannels import RescaleImageChannels
@@ -21,7 +21,7 @@ from mgds.pipelineModules.SampleVAEDistribution import SampleVAEDistribution
 from mgds.pipelineModules.SaveImage import SaveImage
 from mgds.pipelineModules.SaveText import SaveText
 from mgds.pipelineModules.ScaleImage import ScaleImage
-from mgds.pipelineModules.Tokenize import Tokenize
+from modules.dataLoader.mgds_patch.Tokenize import Tokenize
 
 
 class StableDiffusionXLBaseDataLoader(

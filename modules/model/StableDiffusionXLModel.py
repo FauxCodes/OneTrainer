@@ -221,7 +221,7 @@ class StableDiffusionXLModel(BaseModel):
                 self.add_text_encoder_1_embeddings_to_prompt(text),
                 padding='max_length' if not use_chunking else 'do_not_pad',
                 truncation=not use_chunking,
-                max_length=self.tokenizer_1.model_max_length if not use_chunking else None,
+                max_length=self.tokenizer_1.model_max_length if not use_chunking else 1000000,
                 return_tensors="pt",
             )
             tokens_1 = tokenizer_output.input_ids.to(self.text_encoder_1.device)
@@ -231,7 +231,7 @@ class StableDiffusionXLModel(BaseModel):
                 self.add_text_encoder_2_embeddings_to_prompt(text),
                 padding='max_length' if not use_chunking else 'do_not_pad',
                 truncation=not use_chunking,
-                max_length=self.tokenizer_2.model_max_length if not use_chunking else None,
+                max_length=self.tokenizer_2.model_max_length if not use_chunking else 1000000,
                 return_tensors="pt",
             )
             tokens_2 = tokenizer_output.input_ids.to(self.text_encoder_2.device)

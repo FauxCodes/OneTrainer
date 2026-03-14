@@ -68,15 +68,28 @@ class StableDiffusionSampler(BaseModelSampler):
             # prepare prompt
             self.model.text_encoder_to(self.train_device)
 
+            use_chunking = self.model.train_config.use_clip_token_chunks if self.model.train_config else False
+            min_chunks = 1
+            if use_chunking:
+                tokenizer = self.model.tokenizer
+                prompt_tokens = tokenizer(self.model.add_text_encoder_embeddings_to_prompt(prompt)).input_ids
+                negative_prompt_tokens = tokenizer(self.model.add_text_encoder_embeddings_to_prompt(negative_prompt)).input_ids
+                max_len = max(len(prompt_tokens), len(negative_prompt_tokens))
+                chunk_size = tokenizer.model_max_length - 2
+                min_chunks = (max_len - 2 + chunk_size - 1) // chunk_size
+                min_chunks = max(1, min_chunks)
+
             prompt_embedding = self.model.encode_text(
                 text=prompt,
                 train_device=self.train_device,
                 text_encoder_layer_skip=text_encoder_layer_skip,
+                min_chunks=min_chunks,
             )
             negative_prompt_embedding = self.model.encode_text(
                 text=negative_prompt,
                 train_device=self.train_device,
                 text_encoder_layer_skip=text_encoder_layer_skip,
+                min_chunks=min_chunks,
             )
 
             combined_prompt_embedding = torch.cat([negative_prompt_embedding, prompt_embedding]) \
@@ -275,15 +288,28 @@ class StableDiffusionSampler(BaseModelSampler):
             # prepare prompt
             self.model.text_encoder_to(self.train_device)
 
+            use_chunking = self.model.train_config.use_clip_token_chunks if self.model.train_config else False
+            min_chunks = 1
+            if use_chunking:
+                tokenizer = self.model.tokenizer
+                prompt_tokens = tokenizer(self.model.add_text_encoder_embeddings_to_prompt(prompt)).input_ids
+                negative_prompt_tokens = tokenizer(self.model.add_text_encoder_embeddings_to_prompt(negative_prompt)).input_ids
+                max_len = max(len(prompt_tokens), len(negative_prompt_tokens))
+                chunk_size = tokenizer.model_max_length - 2
+                min_chunks = (max_len - 2 + chunk_size - 1) // chunk_size
+                min_chunks = max(1, min_chunks)
+
             prompt_embedding = self.model.encode_text(
                 text=prompt,
                 train_device=self.train_device,
                 text_encoder_layer_skip=text_encoder_layer_skip,
+                min_chunks=min_chunks,
             )
             negative_prompt_embedding = self.model.encode_text(
                 text=negative_prompt,
                 train_device=self.train_device,
                 text_encoder_layer_skip=text_encoder_layer_skip,
+                min_chunks=min_chunks,
             )
 
             combined_prompt_embedding = torch.cat([negative_prompt_embedding, prompt_embedding]) \
