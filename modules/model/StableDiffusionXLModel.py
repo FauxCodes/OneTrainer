@@ -216,12 +216,16 @@ class StableDiffusionXLModel(BaseModel):
         use_chunking = self.train_config.use_clip_token_chunks if self.train_config else False
         encode_fn = encode_clip_chunked if use_chunking else encode_clip
 
+        max_chunks = self.train_config.clip_max_chunks if self.train_config else 1
+        chunk_size = self.train_config.clip_chunk_size if self.train_config else 75
+        max_length = max_chunks * chunk_size + 2
+
         if tokens_1 is None and text is not None:
             tokenizer_output = self.tokenizer_1(
                 self.add_text_encoder_1_embeddings_to_prompt(text),
                 padding='max_length' if not use_chunking else 'do_not_pad',
                 truncation=not use_chunking,
-                max_length=self.tokenizer_1.model_max_length if not use_chunking else 1000000,
+                max_length=self.tokenizer_1.model_max_length if not use_chunking else max_length,
                 return_tensors="pt",
             )
             tokens_1 = tokenizer_output.input_ids.to(self.text_encoder_1.device)
@@ -231,7 +235,7 @@ class StableDiffusionXLModel(BaseModel):
                 self.add_text_encoder_2_embeddings_to_prompt(text),
                 padding='max_length' if not use_chunking else 'do_not_pad',
                 truncation=not use_chunking,
-                max_length=self.tokenizer_2.model_max_length if not use_chunking else 1000000,
+                max_length=self.tokenizer_2.model_max_length if not use_chunking else max_length,
                 return_tensors="pt",
             )
             tokens_2 = tokenizer_output.input_ids.to(self.text_encoder_2.device)
