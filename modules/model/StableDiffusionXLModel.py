@@ -2,7 +2,7 @@ from contextlib import nullcontext
 from random import Random
 
 from modules.model.BaseModel import BaseModel, BaseModelEmbedding
-from modules.model.util.clip_util import encode_clip
+from modules.model.util.clip_util import encode_clip, encode_clip_chunked
 from modules.module.AdditionalEmbeddingWrapper import AdditionalEmbeddingWrapper
 from modules.module.LoRAModule import LoRAModuleWrapper
 from modules.util.convert.rescale_noise_scheduler_to_zero_terminal_snr import (
@@ -215,9 +215,8 @@ class StableDiffusionXLModel(BaseModel):
         if tokens_1 is None and text is not None:
             tokenizer_output = self.tokenizer_1(
                 self.add_text_encoder_1_embeddings_to_prompt(text),
-                padding='max_length',
-                truncation=True,
-                max_length=77,
+                padding='do_not_pad',
+                truncation=False,
                 return_tensors="pt",
             )
             tokens_1 = tokenizer_output.input_ids.to(self.text_encoder_1.device)
@@ -225,14 +224,16 @@ class StableDiffusionXLModel(BaseModel):
         if tokens_2 is None and text is not None:
             tokenizer_output = self.tokenizer_2(
                 self.add_text_encoder_2_embeddings_to_prompt(text),
-                padding='max_length',
-                truncation=True,
-                max_length=77,
+                padding='do_not_pad',
+                truncation=False,
                 return_tensors="pt",
             )
             tokens_2 = tokenizer_output.input_ids.to(self.text_encoder_2.device)
 
-        text_encoder_1_output, _ = encode_clip(
+        use_chunking = self.train_config.use_clip_token_chunks if self.train_config else True
+        encode_fn = encode_clip_chunked if use_chunking else encode_clip
+
+        text_encoder_1_output, _ = encode_fn(
             text_encoder=self.text_encoder_1,
             tokens=tokens_1,
             default_layer=-2,
@@ -243,7 +244,7 @@ class StableDiffusionXLModel(BaseModel):
             add_layer_norm=False,
         )
 
-        text_encoder_2_output, pooled_text_encoder_2_output = encode_clip(
+        text_encoder_2_output, pooled_text_encoder_2_output = encode_fn(
             text_encoder=self.text_encoder_2,
             tokens=tokens_2,
             default_layer=-2,

@@ -1072,6 +1072,9 @@ class TrainConfig(BaseConfig):
         data.append(("text_encoder", text_encoder, TrainModelPartConfig, False))
         data.append(("text_encoder_layer_skip", 0, int, False))
         data.append(("text_encoder_sequence_length", 512, int, True))
+        data.append(("use_clip_token_chunks", False, bool, False))
+        data.append(("clip_chunk_size", 75, int, False))
+        data.append(("clip_max_chunks", 3, int, False))
 
         # text encoder 2
         text_encoder_2 = TrainModelPartConfig.default_values()
