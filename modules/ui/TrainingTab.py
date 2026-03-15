@@ -92,6 +92,7 @@ class TrainingTab:
         self.__create_base_frame(column_0, 0)
         self.__create_text_encoder_frame(column_0, 1)
         self.__create_embedding_frame(column_0, 2)
+        self.__create_clip_chunking_frame(column_0, 3)
 
         self.__create_base2_frame(column_1, 0)
         self.__create_unet_frame(column_1, 1)
@@ -118,9 +119,10 @@ class TrainingTab:
 
     def __setup_stable_diffusion_xl_ui(self, column_0, column_1, column_2):
         self.__create_base_frame(column_0, 0)
-        self.__create_text_encoder_n_frame(column_0, 1, i=1, supports_chunking=True)
+        self.__create_text_encoder_n_frame(column_0, 1, i=1)
         self.__create_text_encoder_n_frame(column_0, 2, i=2)
         self.__create_embedding_frame(column_0, 3)
+        self.__create_clip_chunking_frame(column_0, 4)
 
         self.__create_base2_frame(column_1, 0)
         self.__create_unet_frame(column_1, 1)
@@ -253,6 +255,7 @@ class TrainingTab:
         self.__create_text_encoder_n_frame(column_0, 3, i=3, supports_include=True)
         self.__create_text_encoder_n_frame(column_0, 4, i=4, supports_include=True, supports_layer_skip=False)
         self.__create_embedding_frame(column_0, 5)
+        self.__create_clip_chunking_frame(column_0, 6)
 
         self.__create_base2_frame(column_1, 0, video_training_enabled=True)
         self.__create_transformer_frame(column_1, 1)
@@ -419,7 +422,7 @@ class TrainingTab:
                          tooltip="Enables circular padding for all conv layers to better train seamless images")
         components.switch(frame, row, 1, self.ui_state, "force_circular_padding")
 
-    def __create_text_encoder_frame(self, master, row, supports_clip_skip=True, supports_training=True, supports_sequence_length=False, supports_chunking=False):
+    def __create_text_encoder_frame(self, master, row, supports_clip_skip=True, supports_training=True, supports_sequence_length=False):
         frame = ctk.CTkFrame(master=master, corner_radius=5)
         frame.grid(row=row, column=0, padx=5, pady=5, sticky="nsew")
         frame.grid_columnconfigure(0, weight=1)
@@ -459,25 +462,6 @@ class TrainingTab:
             components.entry(frame, row, 1, self.ui_state, "text_encoder_sequence_length")
             row += 1
 
-        if supports_chunking:
-            # use clip token chunks
-            components.label(frame, row, 0, "Use Clip Token Chunks",
-                             tooltip="Enables processing long prompts by splitting them into chunks. Currently only supported for SDXL.")
-            components.switch(frame, row, 1, self.ui_state, "use_clip_token_chunks")
-            row += 1
-
-            # clip chunk size
-            components.label(frame, row, 0, "Clip Chunk Size",
-                             tooltip="The size of each chunk (excluding BOS and EOS tokens).")
-            components.entry(frame, row, 1, self.ui_state, "clip_chunk_size")
-            row += 1
-
-            # clip max chunks
-            components.label(frame, row, 0, "Clip Max Chunks",
-                             tooltip="The maximum number of chunks to process.")
-            components.entry(frame, row, 1, self.ui_state, "clip_max_chunks")
-            row += 1
-
     def __create_text_encoder_n_frame(
             self,
             master,
@@ -486,7 +470,6 @@ class TrainingTab:
             supports_include: bool = False,
             supports_layer_skip: bool = True,
             supports_sequence_length: bool = False,
-            supports_chunking: bool = False,
     ):
         frame = ctk.CTkFrame(master=master, corner_radius=5)
         frame.grid(row=row, column=0, padx=5, pady=5, sticky="nsew")
@@ -547,25 +530,6 @@ class TrainingTab:
             components.entry(frame, row, 1, self.ui_state, f"text_encoder{suffix}_sequence_length")
             row += 1
 
-        if supports_chunking:
-            # use clip token chunks
-            components.label(frame, row, 0, "Use Clip Token Chunks",
-                             tooltip="Enables processing long prompts by splitting them into chunks. Currently only supported for SDXL.")
-            components.switch(frame, row, 1, self.ui_state, "use_clip_token_chunks")
-            row += 1
-
-            # clip chunk size
-            components.label(frame, row, 0, "Clip Chunk Size",
-                             tooltip="The size of each chunk (excluding BOS and EOS tokens).")
-            components.entry(frame, row, 1, self.ui_state, "clip_chunk_size")
-            row += 1
-
-            # clip max chunks
-            components.label(frame, row, 0, "Clip Max Chunks",
-                             tooltip="The maximum number of chunks to process.")
-            components.entry(frame, row, 1, self.ui_state, "clip_max_chunks")
-            row += 1
-
     def __create_embedding_frame(self, master, row):
         frame = ctk.CTkFrame(master=master, corner_radius=5)
         frame.grid(row=row, column=0, padx=5, pady=5, sticky="nsew")
@@ -579,6 +543,26 @@ class TrainingTab:
         components.label(frame, 1, 0, "Preserve Embedding Norm",
                          tooltip="Rescales each trained embedding to the median embedding norm")
         components.switch(frame, 1, 1, self.ui_state, "preserve_embedding_norm")
+
+    def __create_clip_chunking_frame(self, master, row):
+        frame = ctk.CTkFrame(master=master, corner_radius=5)
+        frame.grid(row=row, column=0, padx=5, pady=5, sticky="nsew")
+        frame.grid_columnconfigure(0, weight=1)
+
+        # use clip token chunks
+        components.label(frame, 0, 0, "Use Clip Token Chunks",
+                         tooltip="Enables processing long prompts by splitting them into chunks.")
+        components.switch(frame, 0, 1, self.ui_state, "use_clip_token_chunks")
+
+        # clip chunk size
+        components.label(frame, 1, 0, "Clip Chunk Size",
+                         tooltip="The size of each chunk (excluding BOS and EOS tokens).")
+        components.entry(frame, 1, 1, self.ui_state, "clip_chunk_size")
+
+        # clip max chunks
+        components.label(frame, 2, 0, "Clip Max Chunks",
+                         tooltip="The maximum number of chunks to process.")
+        components.entry(frame, 2, 1, self.ui_state, "clip_max_chunks")
 
     def __create_unet_frame(self, master, row):
         frame = ctk.CTkFrame(master=master, corner_radius=5)
