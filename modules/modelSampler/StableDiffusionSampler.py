@@ -72,8 +72,20 @@ class StableDiffusionSampler(BaseModelSampler):
             min_chunks = 1
             if use_chunking:
                 tokenizer = self.model.tokenizer
-                prompt_tokens = tokenizer(self.model.add_text_encoder_embeddings_to_prompt(prompt)).input_ids
-                negative_prompt_tokens = tokenizer(self.model.add_text_encoder_embeddings_to_prompt(negative_prompt)).input_ids
+                max_chunks = self.model.train_config.clip_max_chunks if self.model.train_config else 1
+                chunk_size = self.model.train_config.clip_chunk_size if self.model.train_config else 75
+                max_length = max_chunks * chunk_size + 2
+
+                prompt_tokens = tokenizer(
+                    self.model.add_text_encoder_embeddings_to_prompt(prompt),
+                    truncation=True,
+                    max_length=max_length,
+                ).input_ids
+                negative_prompt_tokens = tokenizer(
+                    self.model.add_text_encoder_embeddings_to_prompt(negative_prompt),
+                    truncation=True,
+                    max_length=max_length,
+                ).input_ids
                 max_len = max(len(prompt_tokens), len(negative_prompt_tokens))
                 chunk_size = tokenizer.model_max_length - 2
                 min_chunks = (max_len - 2 + chunk_size - 1) // chunk_size
@@ -292,8 +304,20 @@ class StableDiffusionSampler(BaseModelSampler):
             min_chunks = 1
             if use_chunking:
                 tokenizer = self.model.tokenizer
-                prompt_tokens = tokenizer(self.model.add_text_encoder_embeddings_to_prompt(prompt)).input_ids
-                negative_prompt_tokens = tokenizer(self.model.add_text_encoder_embeddings_to_prompt(negative_prompt)).input_ids
+                max_chunks = self.model.train_config.clip_max_chunks if self.model.train_config else 1
+                chunk_size = self.model.train_config.clip_chunk_size if self.model.train_config else 75
+                max_length = max_chunks * chunk_size + 2
+
+                prompt_tokens = tokenizer(
+                    self.model.add_text_encoder_embeddings_to_prompt(prompt),
+                    truncation=True,
+                    max_length=max_length,
+                ).input_ids
+                negative_prompt_tokens = tokenizer(
+                    self.model.add_text_encoder_embeddings_to_prompt(negative_prompt),
+                    truncation=True,
+                    max_length=max_length,
+                ).input_ids
                 max_len = max(len(prompt_tokens), len(negative_prompt_tokens))
                 chunk_size = tokenizer.model_max_length - 2
                 min_chunks = (max_len - 2 + chunk_size - 1) // chunk_size

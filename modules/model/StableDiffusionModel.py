@@ -234,6 +234,7 @@ class StableDiffusionModel(BaseModel):
             self.tokenizer,
             tokens,
             text_encoder_output,
+            self.train_config,
         )
 
         # apply dropout

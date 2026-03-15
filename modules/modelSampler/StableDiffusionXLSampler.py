@@ -73,14 +73,22 @@ class StableDiffusionXLSampler(BaseModelSampler):
             min_chunks = 1
 
             if use_chunking:
+                max_chunks = self.model.train_config.clip_max_chunks if self.model.train_config else 1
+                chunk_size = self.model.train_config.clip_chunk_size if self.model.train_config else 75
+                max_length = max_chunks * chunk_size + 2
+
                 prompt_1_tokens = self.model.tokenizer_1(
                     self.model.add_text_encoder_1_embeddings_to_prompt(prompt),
                     add_special_tokens=True,
+                    truncation=True,
+                    max_length=max_length,
                     return_tensors="pt",
                 ).input_ids
                 negative_prompt_1_tokens = self.model.tokenizer_1(
                     self.model.add_text_encoder_1_embeddings_to_prompt(negative_prompt),
                     add_special_tokens=True,
+                    truncation=True,
+                    max_length=max_length,
                     return_tensors="pt",
                 ).input_ids
 

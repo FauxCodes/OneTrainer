@@ -276,6 +276,7 @@ class StableDiffusionXLModel(BaseModel):
             self.tokenizer_1,
             tokens_1,
             text_encoder_1_output,
+            self.train_config,
         )
 
         text_encoder_2_output = self._apply_output_embeddings(
@@ -283,6 +284,7 @@ class StableDiffusionXLModel(BaseModel):
             self.tokenizer_2,
             tokens_2,
             text_encoder_2_output,
+            self.train_config,
         )
 
         # apply dropout

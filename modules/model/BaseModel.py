@@ -122,15 +122,25 @@ class BaseModel(metaclass=ABCMeta):
             tokenizer: PreTrainedTokenizer,
             tokens: torch.Tensor,
             text_encoder_output: torch.Tensor,
+            train_config: TrainConfig | None = None,
     ) -> torch.Tensor:
         for embedding in embeddings:
             if embedding.is_output_embedding:
                 text_encoder_output = text_encoder_output.to(dtype=torch.float32)
 
                 if embedding.joint_tokens_cache is None:
+                    max_length = None
+                    if train_config is not None:
+                        if getattr(train_config, 'use_clip_token_chunks', False):
+                            max_chunks = getattr(train_config, 'clip_max_chunks', 1)
+                            chunk_size = getattr(train_config, 'clip_chunk_size', 75)
+                            max_length = max_chunks * chunk_size + 2
+
                     embedding.joint_tokens_cache = tokenizer(
                         embedding.joint_text_tokens,
                         add_special_tokens=False,
+                        truncation=True if max_length is not None else None,
+                        max_length=max_length,
                         return_tensors="pt",
                     ).input_ids.to(text_encoder_output.device)
 
