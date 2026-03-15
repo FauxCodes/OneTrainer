@@ -21,7 +21,7 @@ from mgds.pipelineModules.SampleVAEDistribution import SampleVAEDistribution
 from mgds.pipelineModules.SaveImage import SaveImage
 from mgds.pipelineModules.SaveText import SaveText
 from mgds.pipelineModules.ScaleImage import ScaleImage
-from modules.dataLoader.mgds_patch.Tokenize import Tokenize
+from mgds.pipelineModules.Tokenize import Tokenize
 
 
 class StableDiffusionXLBaseDataLoader(
