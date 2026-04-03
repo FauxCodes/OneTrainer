@@ -139,3 +139,4 @@ class StableDiffusionXLFlowFineTuneSetup(
         self.__setup_requires_grad(model, config)
 
 factory.register(BaseModelSetup, StableDiffusionXLFlowFineTuneSetup, ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW, TrainingMethod.FINE_TUNE)
+factory.register(BaseModelSetup, StableDiffusionXLFlowFineTuneSetup, ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW_FLUX2_VAE, TrainingMethod.FINE_TUNE)

@@ -181,7 +181,8 @@ class StableDiffusionXLFlowSampler(BaseModelSampler):
 
             latent_image = latent_image.to(dtype=self.model.vae_train_dtype.torch_dtype())
             with self.model.vae_autocast_context:
-                image = vae.decode(latent_image / vae.config.scaling_factor, return_dict=False)[0]
+                scaling_factor = getattr(vae.config, 'scaling_factor', 1.0)
+                image = vae.decode(latent_image / scaling_factor, return_dict=False)[0]
 
             do_denormalize = [True] * image.shape[0]
             image = image_processor.postprocess(image, output_type='pil', do_denormalize=do_denormalize)
@@ -275,7 +276,7 @@ class StableDiffusionXLFlowSampler(BaseModelSampler):
                     conditioning_image = conditioning_image.unsqueeze(0)
 
                     latent_conditioning_image = vae.encode(
-                        conditioning_image).latent_dist.mode() * vae.config.scaling_factor
+                        conditioning_image).latent_dist.mode() * getattr(vae.config, 'scaling_factor', 1.0)
 
                     rescale_mask = transforms.Resize(
                         (round(mask.shape[1] // 8), round(mask.shape[2] // 8)),
@@ -292,7 +293,7 @@ class StableDiffusionXLFlowSampler(BaseModelSampler):
                         device=self.train_device,
                     )
                     conditioning_image = conditioning_image
-                    latent_conditioning_image = vae.encode(conditioning_image).latent_dist.mode() * vae.config.scaling_factor
+                    latent_conditioning_image = vae.encode(conditioning_image).latent_dist.mode() * getattr(vae.config, 'scaling_factor', 1.0)
                     latent_mask = torch.ones(
                         size=(1, 1, latent_conditioning_image.shape[2], latent_conditioning_image.shape[3]),
                         dtype=self.model.train_dtype.torch_dtype(),
@@ -433,7 +434,7 @@ class StableDiffusionXLFlowSampler(BaseModelSampler):
 
             latent_image = latent_image.to(dtype=self.model.vae_train_dtype.torch_dtype())
             with self.model.vae_autocast_context:
-                image = vae.decode(latent_image / vae.config.scaling_factor, return_dict=False)[0]
+                image = vae.decode(latent_image / getattr(vae.config, 'scaling_factor', 1.0), return_dict=False)[0]
 
             do_denormalize = [True] * image.shape[0]
             image = image_processor.postprocess(image, output_type='pil', do_denormalize=do_denormalize)
@@ -502,3 +503,4 @@ class StableDiffusionXLFlowSampler(BaseModelSampler):
         on_sample(sampler_output)
 
 factory.register(BaseModelSampler, StableDiffusionXLFlowSampler, ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW)
+factory.register(BaseModelSampler, StableDiffusionXLFlowSampler, ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW_FLUX2_VAE)

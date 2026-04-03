@@ -5,7 +5,7 @@ from modules.modelSaver.stableDiffusionXL.StableDiffusionXLLoRASaver import Stab
 from modules.util.enum.ModelType import ModelType
 
 StableDiffusionXLLoRAModelSaver = make_lora_model_saver(
-    [ModelType.STABLE_DIFFUSION_XL_10_BASE, ModelType.STABLE_DIFFUSION_XL_10_BASE_INPAINTING, ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW],
+    [ModelType.STABLE_DIFFUSION_XL_10_BASE, ModelType.STABLE_DIFFUSION_XL_10_BASE_INPAINTING, ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW, ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW_FLUX2_VAE],
     model_class=StableDiffusionXLModel,
     lora_saver_class=StableDiffusionXLLoRASaver,
     embedding_saver_class=StableDiffusionXLEmbeddingSaver,

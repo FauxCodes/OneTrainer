@@ -4,7 +4,7 @@ from modules.modelSaver.stableDiffusionXL.StableDiffusionXLEmbeddingSaver import
 from modules.util.enum.ModelType import ModelType
 
 StableDiffusionXLEmbeddingModelSaver = make_embedding_model_saver(
-    [ModelType.STABLE_DIFFUSION_XL_10_BASE, ModelType.STABLE_DIFFUSION_XL_10_BASE_INPAINTING, ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW],
+    [ModelType.STABLE_DIFFUSION_XL_10_BASE, ModelType.STABLE_DIFFUSION_XL_10_BASE_INPAINTING, ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW, ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW_FLUX2_VAE],
     model_class=StableDiffusionXLModel,
     embedding_saver_class=StableDiffusionXLEmbeddingSaver,
 )

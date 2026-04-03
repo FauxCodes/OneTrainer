@@ -174,3 +174,4 @@ class StableDiffusionXLFlowLoRASetup(
         self.__setup_requires_grad(model, config)
 
 factory.register(BaseModelSetup, StableDiffusionXLFlowLoRASetup, ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW, TrainingMethod.LORA)
+factory.register(BaseModelSetup, StableDiffusionXLFlowLoRASetup, ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW_FLUX2_VAE, TrainingMethod.LORA)

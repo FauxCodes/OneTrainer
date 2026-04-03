@@ -200,7 +200,7 @@ class BaseStableDiffusionXLFlowSetup(
             generator.manual_seed(batch_seed)
             rand = Random(batch_seed)
 
-            vae_scaling_factor = model.vae.config['scaling_factor']
+            vae_scaling_factor = getattr(model.vae.config, 'scaling_factor', 1.0)
 
             text_encoder_output, pooled_text_encoder_2_output = model.combine_text_encoder_output(*model.encode_text(
                 train_device=self.train_device,

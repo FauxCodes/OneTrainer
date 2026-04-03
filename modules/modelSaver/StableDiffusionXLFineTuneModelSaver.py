@@ -5,7 +5,7 @@ from modules.modelSaver.stableDiffusionXL.StableDiffusionXLModelSaver import Sta
 from modules.util.enum.ModelType import ModelType
 
 StableDiffusionXLFineTuneModelSaver = make_fine_tune_model_saver(
-    [ModelType.STABLE_DIFFUSION_XL_10_BASE, ModelType.STABLE_DIFFUSION_XL_10_BASE_INPAINTING, ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW],
+    [ModelType.STABLE_DIFFUSION_XL_10_BASE, ModelType.STABLE_DIFFUSION_XL_10_BASE_INPAINTING, ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW, ModelType.STABLE_DIFFUSION_XL_10_BASE_FLOW_FLUX2_VAE],
     model_class=StableDiffusionXLModel,
     model_saver_class=StableDiffusionXLModelSaver,
     embedding_saver_class=StableDiffusionXLEmbeddingSaver,

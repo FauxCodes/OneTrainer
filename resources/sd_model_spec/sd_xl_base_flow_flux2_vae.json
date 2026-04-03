@@ -1,0 +1,14 @@
+{
+    "modelspec.sai_model_spec": "1.0.0",
+    "modelspec.architecture": "stable-diffusion-xl-v1-base/flow-flux2-vae",
+    "modelspec.implementation": "https://github.com/huggingface/diffusers",
+    "modelspec.title": "Stable Diffusion XL 1.0 Base Flow Matching + Flux2 VAE",
+    "modelspec.description": "SDXL 1.0 Base Model with flow matching noise scheduling and Flux2 VAE (32ch latents)",
+    "modelspec.author": "",
+    "modelspec.date": "",
+    "modelspec.hash_sha256": "",
+    "modelspec.license": "",
+    "modelspec.thumbnail": "",
+    "modelspec.resolution": "1024x1024",
+    "modelspec.prediction_type": "flow"
+}
